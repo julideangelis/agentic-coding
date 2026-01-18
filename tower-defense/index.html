@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Defense - Protect the Kingdom</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            margin: 20px;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .instructions {
+            color: #cccccc;
+            text-align: center;
+            max-width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .instructions h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+
+        .instructions ul {
+            text-align: left;
+            display: inline-block;
+        }
+
+        .instructions li {
+            margin: 10px 0;
+        }
+
+        .tower-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 10px 0;
+        }
+
+        .tower-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            min-width: 150px;
+        }
+
+        .tower-card h3 {
+            margin: 5px 0;
+            color: #ffd700;
+        }
+
+        .basic { border-left: 4px solid #4488ff; }
+        .fast { border-left: 4px solid #ff4488; }
+        .heavy { border-left: 4px solid #44ff88; }
+    </style>
+</head>
+<body>
+    <h1>🏰 Tower Defense - Protect the Kingdom 🏰</h1>
+
+    <div id="game-container"></div>
+
+    <div class="instructions">
+        <h2>How to Play</h2>
+        <ul>
+            <li>💰 Use gold to build towers along the path</li>
+            <li>🎯 Click a tower type at the bottom, then click on the map to place it</li>
+            <li>🛡️ Defend your kingdom from waves of enemies</li>
+            <li>⚔️ Each wave gets progressively harder</li>
+            <li>❤️ Don't let enemies reach your kingdom!</li>
+            <li>🏆 Earn gold by defeating enemies and completing waves</li>
+        </ul>
+
+        <div class="tower-info">
+            <div class="tower-card basic">
+                <h3>Basic Tower</h3>
+                <p>Cost: $50</p>
+                <p>Damage: 15</p>
+                <p>Range: Medium</p>
+                <p>Fire Rate: Normal</p>
+            </div>
+            <div class="tower-card fast">
+                <h3>Fast Tower</h3>
+                <p>Cost: $75</p>
+                <p>Damage: 8</p>
+                <p>Range: Short</p>
+                <p>Fire Rate: Very Fast</p>
+            </div>
+            <div class="tower-card heavy">
+                <h3>Heavy Tower</h3>
+                <p>Cost: $100</p>
+                <p>Damage: 40</p>
+                <p>Range: Long</p>
+                <p>Fire Rate: Slow</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

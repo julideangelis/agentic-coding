@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agents-productivos — cómo funciona la skill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0C141D;
+  --panel:#131F2B;
+  --panel-2:#182735;
+  --line:#22384C;
+  --line-soft:#1A2B3B;
+  --paper:#E6EDF4;
+  --muted:#8AA2BA;
+  --dim:#5D7691;
+  --signal:#F0A93C;
+  --pass:#43CBA6;
+  --alarm:#E86A5B;
+  --grid:rgba(84,124,160,.09);
+  --fd:"Bricolage Grotesque","Archivo",system-ui,sans-serif;
+  --fb:"IBM Plex Sans",system-ui,sans-serif;
+  --fm:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--ink);color:var(--paper);
+  font-family:var(--fb);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:64px 64px;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.03em;line-height:1.02;margin:0}
+p{margin:0 0 1em}
+a{color:var(--signal)}
+
+.eyebrow{
+  font-family:var(--fm);font-size:11px;font-weight:500;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--dim);
+}
+
+/* ---------- masthead ---------- */
+.mast{padding:44px 0 0;display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap}
+.mast-id{font-family:var(--fm);font-size:12px;color:var(--muted)}
+.mast-id b{color:var(--paper);font-weight:600}
+.tag{
+  font-family:var(--fm);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid var(--line);color:var(--muted);padding:4px 9px;border-radius:2px;
+}
+
+/* ---------- hero ---------- */
+.hero{padding:52px 0 24px}
+.hero h1{font-size:clamp(40px,7.4vw,86px)}
+.hero h1 .em{color:var(--signal)}
+.hero-lede{max-width:56ch;color:var(--muted);font-size:17px;margin-top:22px}
+.hero-lede strong{color:var(--paper);font-weight:600}
+
+/* ---------- plot ---------- */
+.instr{
+  margin:40px 0 0;border:1px solid var(--line);background:var(--panel);
+  border-radius:3px;overflow:hidden;
+}
+.instr-head{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:14px 20px;border-bottom:1px solid var(--line-soft);background:var(--panel-2);
+}
+.instr-title{font-family:var(--fm);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.readout{font-family:var(--fm);font-size:12px;color:var(--dim)}
+.readout b{color:var(--signal);font-size:20px;font-weight:600;letter-spacing:-.02em}
+.plot-box{padding:18px 20px 6px}
+svg.plot{display:block;width:100%;height:auto;overflow:visible}
+.ctrls{
+  display:grid;grid-template-columns:1fr 1fr;gap:20px 30px;
+  padding:8px 20px 22px;
+}
+.ctrl label{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--fm);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+  margin-bottom:8px;
+}
+.ctrl label span{color:var(--paper);font-size:13px;letter-spacing:0;text-transform:none}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:2px;
+  background:var(--line);border-radius:2px;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+  background:var(--signal);cursor:pointer;border:3px solid var(--ink);
+}
+input[type=range]::-moz-range-thumb{
+  width:15px;height:15px;border-radius:50%;background:var(--signal);
+  cursor:pointer;border:3px solid var(--ink);
+}
+input[type=range]:focus-visible{outline:2px solid var(--pass);outline-offset:6px}
+.instr-foot{
+  padding:14px 20px;border-top:1px solid var(--line-soft);
+  font-size:14px;color:var(--muted);background:var(--panel-2);
+}
+.instr-foot b{color:var(--paper);font-weight:600}
+
+/* ---------- sections ---------- */
+section{padding:88px 0 0}
+.sec-head{margin-bottom:34px;max-width:60ch}
+.sec-head h2{font-size:clamp(26px,3.7vw,38px);margin:10px 0 12px}
+.sec-head p{color:var(--muted);margin:0}
+
+/* ---------- modes ---------- */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.mode{
+  border:1px solid var(--line);background:var(--panel);border-radius:3px;
+  padding:26px 24px;position:relative;
+}
+.mode-b{border-color:#2E4256}
+.mode-key{font-family:var(--fm);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px}
+.mode-a .mode-key{color:var(--signal)}
+.mode-b .mode-key{color:var(--pass)}
+.mode h3{font-size:23px;margin-bottom:12px}
+.mode p{color:var(--muted);font-size:15px;margin-bottom:16px}
+.mode-path{
+  font-family:var(--fm);font-size:12px;color:var(--dim);
+  border-top:1px dashed var(--line);padding-top:14px;
+}
+.mode-path b{color:var(--paper);font-weight:500}
+
+/* ---------- budget ---------- */
+.budget{border:1px solid var(--line);background:var(--panel);border-radius:3px;padding:26px 24px}
+.bar{display:flex;height:36px;border-radius:2px;overflow:hidden;border:1px solid var(--line)}
+.bar-res{background:var(--signal);flex:0 0 10.4%}
+.bar-dem{background:repeating-linear-gradient(135deg,var(--panel-2),var(--panel-2) 5px,#1E3145 5px,#1E3145 10px);flex:1}
+.bar-legend{display:flex;justify-content:space-between;gap:20px;margin-top:14px;flex-wrap:wrap}
+.leg{font-family:var(--fm);font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:9px}
+.chip{width:11px;height:11px;border-radius:2px;flex:0 0 auto}
+.chip-res{background:var(--signal)}
+.chip-dem{background:#1E3145;border:1px solid var(--line)}
+.budget-note{margin-top:20px;font-size:14.5px;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:18px}
+.budget-note b{color:var(--paper);font-weight:600}
+
+/* ---------- phases ---------- */
+.phases{border-top:1px solid var(--line)}
+.ph{border-bottom:1px solid var(--line)}
+.ph-btn{
+  width:100%;background:none;border:0;color:inherit;font:inherit;cursor:pointer;
+  display:grid;grid-template-columns:52px 1fr auto;gap:18px;align-items:baseline;
+  padding:19px 4px;text-align:left;transition:background .16s;
+}
+.ph-btn:hover{background:rgba(240,169,60,.045)}
+.ph-btn:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+.ph-n{font-family:var(--fm);font-size:12px;color:var(--dim);letter-spacing:.06em;padding-top:4px}
+.ph-name{font-family:var(--fd);font-weight:600;font-size:19px;letter-spacing:-.02em}
+.ph-meta{font-family:var(--fm);font-size:11px;color:var(--dim);white-space:nowrap;padding-top:4px}
+.ph[data-open="1"] .ph-n{color:var(--signal)}
+.ph-body{display:none;padding:0 4px 26px 74px}
+.ph[data-open="1"] .ph-body{display:block}
+.ph-body p{color:var(--muted);font-size:15px;max-width:62ch}
+.ph-out{
+  margin-top:16px;border-left:2px solid var(--pass);padding:2px 0 2px 16px;
+  font-size:14.5px;
+}
+.ph-out span{
+  font-family:var(--fm);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--pass);display:block;margin-bottom:5px;
+}
+.ph-file{
+  margin-top:16px;font-family:var(--fm);font-size:12px;color:var(--dim);
+}
+.gate{
+  margin-top:22px;padding:16px 18px;border:1px dashed var(--line);border-radius:3px;
+  font-size:14.5px;color:var(--muted);
+}
+.gate b{color:var(--signal);font-weight:600}
+
+/* ---------- audit ---------- */
+.audit-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 44px}
+.arow{display:grid;grid-template-columns:34px 1fr 30px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.acode{font-family:var(--fm);font-size:11px;color:var(--signal);letter-spacing:.08em}
+.aname{font-size:14px;color:var(--paper)}
+.acount{font-family:var(--fm);font-size:12px;color:var(--dim);text-align:right}
+.atrack{grid-column:1/-1;height:3px;background:var(--line-soft);border-radius:2px;margin-top:7px;overflow:hidden}
+.afill{height:100%;background:var(--signal);opacity:.65}
+.states{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px}
+.state{border:1px solid var(--line);border-radius:3px;padding:16px 16px;background:var(--panel)}
+.state b{font-family:var(--fm);font-size:11px;letter-spacing:.14em;display:block;margin-bottom:7px}
+.state p{font-size:13.5px;color:var(--muted);margin:0}
+.s-ok b{color:var(--pass)}
+.s-gap b{color:var(--alarm)}
+.s-na b{color:var(--dim)}
+
+/* ---------- install ---------- */
+.code{
+  background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  font-family:var(--fm);font-size:13px;color:var(--paper);
+  padding:20px 22px;overflow-x:auto;line-height:1.85;
+}
+.code .c{color:var(--dim)}
+.code .k{color:var(--pass)}
+
+footer{margin-top:96px;padding:30px 0 60px;border-top:1px solid var(--line)}
+.foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;font-family:var(--fm);font-size:11.5px;color:var(--dim)}
+
+@media (max-width:760px){
+  .wrap{padding:0 20px}
+  .modes,.audit-grid,.ctrls,.states{grid-template-columns:1fr}
+  .audit-grid{gap:0}
+  .states{gap:12px}
+  .ph-btn{grid-template-columns:40px 1fr;gap:12px}
+  .ph-meta{grid-column:2;padding-top:6px;white-space:normal}
+  .ph-body{padding-left:52px}
+  section{padding-top:64px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="mast-id"><b>agents-productivos</b> · skill de Claude · 12 archivos · 1.187 líneas</div>
+  <div class="tag">Guía de diseño + /audit</div>
+</header>
+
+<div class="hero">
+  <div class="eyebrow">La razón por la que existe</div>
+  <h1>La confiabilidad<br>se <span class="em">multiplica</span>,<br>no se promedia.</h1>
+  <p class="hero-lede">Un agent con 95% de acierto por paso suena excelente. Encadenado veinte veces, termina bien
+  poco más de un tercio de las corridas. <strong>Todo lo demás que hace esta skill se deduce de esa curva:</strong>
+  sacarle decisiones al modelo, acotar el loop, medir la trayectoria.</p>
+</div>
+
+<div class="instr">
+  <div class="instr-head">
+    <div class="instr-title">Error compuesto · p<sup>n</sup></div>
+    <div class="readout">corrida completa sin error &nbsp;<b id="out">35,8%</b></div>
+  </div>
+  <div class="plot-box">
+    <svg class="plot" id="plot" viewBox="0 0 900 300" role="img" aria-labelledby="plot-t">
+      <title id="plot-t">Curva de confiabilidad acumulada según cantidad de pasos</title>
+      <g id="gridlines" stroke="#1E3145" stroke-width="1"></g>
+      <g id="ylabels" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5D7691"></g>
+      <g id="xlabels" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5D7691"></g>
+      <path id="area" fill="url(#g1)" opacity=".16"></path>
+      <path id="curve" fill="none" stroke="#F0A93C" stroke-width="2.5" stroke-linecap="round"></path>
+      <line id="vline" stroke="#43CBA6" stroke-width="1" stroke-dasharray="3 4"></line>
+      <circle id="dot" r="5.5" fill="#43CBA6" stroke="#0C141D" stroke-width="3"></circle>
+      <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F0A93C"/><stop offset="100%" stop-color="#F0A93C" stop-opacity="0"/>
+      </linearGradient></defs>
+    </svg>
+  </div>
+  <div class="ctrls">
+    <div class="ctrl">
+      <label for="p">Acierto por paso <span id="pv">95,0%</span></label>
+      <input type="range" id="p" min="800" max="999" value="950" step="1">
+    </div>
+    <div class="ctrl">
+      <label for="n">Pasos encadenados <span id="nv">20</span></label>
+      <input type="range" id="n" min="1" max="40" value="20" step="1">
+    </div>
+  </div>
+  <div class="instr-foot">
+    Movelo y comparalo: <b>bajar de 20 pasos a 8 rinde casi exactamente lo mismo que subir el acierto por paso de 95% a 98%</b>
+    (66,3% contra 66,8%). Una de las dos cosas depende de un modelo mejor. La otra depende de una decisión de diseño
+    que podés tomar hoy — y es la que pregunta la fase 0.
+  </div>
+</div>
+
+<section id="modos">
+  <div class="sec-head">
+    <div class="eyebrow">Punto de entrada</div>
+    <h2>Dos modos, una sola decisión al abrir</h2>
+    <p>Lo primero que hace la skill es identificar en cuál de las dos situaciones está la persona. El resto del recorrido cambia por completo.</p>
+  </div>
+  <div class="modes">
+    <div class="mode mode-a">
+      <div class="mode-key">Modo diseño</div>
+      <h3>Se está construyendo un agent</h3>
+      <p>Recorre las diez fases en orden. Lee el archivo de cada fase antes de hacer las preguntas de esa fase, propone un default razonado y registra la decisión con su motivo.</p>
+      <div class="mode-path">Entrega → <b>documento de diseño</b> con las diez salidas más riesgos abiertos</div>
+    </div>
+    <div class="mode mode-b">
+      <div class="mode-key">Modo /audit</div>
+      <h3>Ya existe y hay que revisarlo</h3>
+      <p>Va directo al checklist. Recolecta trazas reales antes que prompts, marca 98 checks, clasifica cada gap por severidad y esfuerzo, y ordena el reporte por impacto.</p>
+      <div class="mode-path">Entrega → <b>reporte con semáforo</b>, hallazgos críticos y plan en tres tiempos</div>
+    </div>
+  </div>
+</section>
+
+<section id="arquitectura">
+  <div class="sec-head">
+    <div class="eyebrow">Arquitectura de la skill</div>
+    <h2>Se aplica a sí misma</h2>
+    <p>La skill enseña a no gastar contexto de más, así que está construida igual: un mapa liviano siempre presente y diez archivos que se abren sólo cuando esa decisión está sobre la mesa.</p>
+  </div>
+  <div class="budget">
+    <div class="bar">
+      <div class="bar-res" title="SKILL.md — 124 líneas"></div>
+      <div class="bar-dem" title="Archivos de fase y checklist — 1.063 líneas"></div>
+    </div>
+    <div class="bar-legend">
+      <div class="leg"><span class="chip chip-res"></span> SKILL.md · 124 líneas · siempre en contexto</div>
+      <div class="leg"><span class="chip chip-dem"></span> 11 archivos · 1.063 líneas · a demanda</div>
+    </div>
+    <div class="budget-note">
+      SKILL.md no tiene contenido: tiene el mapa. Por cada fase, qué cubre, dónde vive y
+      <b>cuál es la salida concreta que esa fase tiene que producir</b>. El documento final es la suma de las diez salidas,
+      así que no hay una lista de entregables que mantener sincronizada aparte.
+    </div>
+  </div>
+</section>
+
+<section id="fases">
+  <div class="sec-head">
+    <div class="eyebrow">Modo diseño</div>
+    <h2>Las diez fases</h2>
+    <p>En orden de decisión, no de dificultad. Tocá cualquiera para ver qué resuelve y qué deja escrito.</p>
+  </div>
+
+  <div class="phases" id="phases"></div>
+
+  <div class="gate">
+    <b>No se saltean la 0 y la 1.</b> Las demás pueden quedar abiertas y cerrarse en otra conversación.
+    Casi todos los agents que fracasan en producción fallan en esas dos, no en las capas técnicas de más abajo.
+  </div>
+</section>
+
+<section id="audit">
+  <div class="sec-head">
+    <div class="eyebrow">Modo /audit</div>
+    <h2>98 checks en diez bloques</h2>
+    <p>El peso de cada bloque no es casual: tools, guardrails y control flow concentran la mitad del checklist porque ahí es donde se rompen los agents que ya están andando.</p>
+  </div>
+  <div class="audit-grid" id="audit"></div>
+  <div class="states">
+    <div class="state s-ok"><b>OK</b><p>Resuelto y verificable. No alcanza con que alguien lo afirme.</p></div>
+    <div class="state s-gap"><b>GAP</b><p>Falta, está mal resuelto, o no se pudo verificar. La ausencia de evidencia cuenta como gap.</p></div>
+    <div class="state s-na"><b>N/A</b><p>No aplica a este caso, con el motivo anotado al lado.</p></div>
+  </div>
+</section>
+
+<section id="usar">
+  <div class="sec-head">
+    <div class="eyebrow">Instalación</div>
+    <h2>Ponerla a andar</h2>
+    <p>Descomprimir en la raíz del repo y commitear. La carpeta ya viene con la ruta correcta.</p>
+  </div>
+  <div class="code"><span class="c"># en la raíz del repo</span>
+unzip agents-productivos-para-repo.zip
+git add <span class="k">skills/agents-productivos</span>
+git commit -m <span class="k">"Add agents-productivos skill"</span>
+git push</div>
+</section>
+
+<footer>
+  <div class="foot">
+    <div>agents-productivos · guía de diseño y auditoría de agents de producción</div>
+    <div>no aplica a coding agents</div>
+  </div>
+</footer>
+
+</div>
+
+<script>
+/* ---------------- curva de error compuesto ---------------- */
+const P=document.getElementById('p'), N=document.getElementById('n');
+const pv=document.getElementById('pv'), nv=document.getElementById('nv'), out=document.getElementById('out');
+const curve=document.getElementById('curve'), area=document.getElementById('area');
+const dot=document.getElementById('dot'), vline=document.getElementById('vline');
+const W=900,H=300,L=52,R=14,T=14,B=34,MAXN=40;
+const X=i=>L+(i-1)/(MAXN-1)*(W-L-R);
+const Y=v=>T+(1-v)*(H-T-B);
+
+(function scaffold(){
+  const g=document.getElementById('gridlines'), yl=document.getElementById('ylabels'), xl=document.getElementById('xlabels');
+  [0,.25,.5,.75,1].forEach(v=>{
+    const y=Y(v);
+    g.insertAdjacentHTML('beforeend',`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}"/>`);
+    yl.insertAdjacentHTML('beforeend',`<text x="${L-12}" y="${y+4}" text-anchor="end">${Math.round(v*100)}%</text>`);
+  });
+  [1,10,20,30,40].forEach(i=>{
+    xl.insertAdjacentHTML('beforeend',`<text x="${X(i)}" y="${H-12}" text-anchor="middle">${i}</text>`);
+  });
+  xl.insertAdjacentHTML('beforeend',`<text x="${W-R}" y="${H-12}" text-anchor="end" fill="#5D7691">pasos</text>`);
+})();
+
+function fmt(x){return x.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';}
+
+function draw(){
+  const p=(+P.value)/1000, n=+N.value;
+  pv.textContent=fmt(p*100); nv.textContent=n;
+  const r=Math.pow(p,n);
+  out.textContent=fmt(r*100);
+  out.style.color = r>=.8 ? '#43CBA6' : (r>=.5 ? '#F0A93C' : '#E86A5B');
+
+  let d='';
+  for(let i=1;i<=MAXN;i++){ d+=(i===1?'M':'L')+X(i).toFixed(1)+' '+Y(Math.pow(p,i)).toFixed(1)+' '; }
+  curve.setAttribute('d',d);
+  area.setAttribute('d', d+`L ${X(MAXN)} ${Y(0)} L ${X(1)} ${Y(0)} Z`);
+
+  const cx=X(n), cy=Y(r);
+  dot.setAttribute('cx',cx); dot.setAttribute('cy',cy);
+  vline.setAttribute('x1',cx); vline.setAttribute('x2',cx);
+  vline.setAttribute('y1',cy); vline.setAttribute('y2',Y(0));
+}
+P.addEventListener('input',draw); N.addEventListener('input',draw); draw();
+
+/* ---------------- fases ---------------- */
+const PH=[
+ {n:'00',t:'¿Esto necesita ser un agent?',f:'fase-0-complejidad.md',l:56,
+  d:'Las tres señales de que un agent aporta valor real (decisión con matices, reglas inmantenibles, datos no estructurados), la escala de cinco escalones de complejidad, y la curva de arriba. El antipatrón que más aparece: un loop que siempre llama las mismas tres tools en el mismo orden, o sea un workflow disfrazado con el costo de un agent.',
+  o:'Qué escalón de complejidad, y por qué se descartó el anterior.'},
+ {n:'01',t:'El contrato de la tarea',f:'fase-1-contrato.md',l:25,
+  d:'Qué entra, qué sale y cuándo termina. Incluye la rama "no sé" explícita, que es la forma más barata de contener alucinaciones, y las cuatro condiciones de terminación: éxito, techo duro, escalamiento y fracaso parcial.',
+  o:'Esquema de salida, condiciones de terminación, y la frase verificable de éxito.'},
+ {n:'02',t:'Context engineering',f:'fase-2-contexto.md',l:111,
+  d:'La altitud del system prompt: ni árbol de decisión hardcodeado ni consignas vagas. La elección entre precarga, just-in-time e híbrida. Y el prompt tratado como código, versionado y probado contra evals antes de mergear.',
+  o:'Estrategia de recuperación y presupuesto estimado de tokens.'},
+ {n:'03',t:'Diseño de tools',f:'fase-3-tools.md',l:97,
+  d:'Consolidar por workflow en vez de espejar endpoints, devolver lenguaje interpretable en vez de UUIDs, y escribir errores que le digan al agent qué hacer distinto. El problema nunca es la cantidad de tools sino el solapamiento entre ellas.',
+  o:'Inventario de tools con tipo, riesgo y si es reintentable.'},
+ {n:'04',t:'Control flow y estado',f:'fase-4-control-flow-estado.md',l:98,
+  d:'Quién es dueño del loop: el modelo o el código. El estado en almacenamiento serializable fuera del modelo, que es lo que habilita pausar, reanudar y escalar horizontalmente. Y la escotilla de emergencia: tope de iteraciones más timeout más condiciones de completitud, los tres juntos.',
+  o:'Postura de control, dónde vive el estado, límites duros del loop.'},
+ {n:'05',t:'Arquitectura',f:'fase-5-arquitectura.md',l:64,
+  d:'Single vs multi-agente con los números reales de costo, orquestador-worker frente a handoff descentralizado, y el antipatrón de subagentes que se hablan entre sí sobre trabajo interdependiente.',
+  o:'Topología y palanca de horizonte largo.'},
+ {n:'06',t:'Elección del modelo',f:'fase-6-modelo.md',l:75,
+  d:'Cinco ejes para caracterizar la tarea, el método de empezar con el modelo más capaz y medir la degradación al bajar, y el ruteo por paso en vez de por agent. Un modelo más chico a veces gasta más tokens totales porque necesita más intentos.',
+  o:'Tabla paso → modelo → por qué → costo estimado.'},
+ {n:'07',t:'Cache y economía de tokens',f:'fase-7-cache-costos.md',l:77,
+  d:'El cache es coincidencia literal de prefijo, no semántica. Un solo timestamp arriba lo anula entero. Incluye la lista completa de lo que lo rompe y el cálculo de costo por corrida.',
+  o:'Orden del prefijo con el borde estable/variable marcado.'},
+ {n:'08',t:'Guardrails, HITL y seguridad',f:'fase-8-guardrails-hitl.md',l:106,
+  d:'Guardrails en capas con ejecución en paralelo, no encadenados antes del agent sumando latencia. Clasificación de riesgo por tool y diseño del checkpoint humano, que se diseña o se convierte en un sello automático.',
+  o:'Capas de guardrails y matriz de aprobación humana.'},
+ {n:'09',t:'Evals y observabilidad',f:'fase-9-evals-observabilidad.md',l:94,
+  d:'La unidad de evaluación es la trayectoria, no la respuesta final. Y no se puntúa el camino exacto: dos corridas válidas pueden usar distintas tools en distinto orden. Cierra con el orden de rollout, de shadow a autónomo.',
+  o:'5–10 casos iniciales y las métricas a instrumentar.'}
+];
+
+document.getElementById('phases').innerHTML = PH.map((x,i)=>`
+<div class="ph" data-open="0">
+  <button class="ph-btn" aria-expanded="false" aria-controls="pb${i}">
+    <span class="ph-n">${x.n}</span>
+    <span class="ph-name">${x.t}</span>
+    <span class="ph-meta">${x.l} líneas</span>
+  </button>
+  <div class="ph-body" id="pb${i}">
+    <p>${x.d}</p>
+    <div class="ph-out"><span>Salida de la fase</span>${x.o}</div>
+    <div class="ph-file">references/${x.f}</div>
+  </div>
+</div>`).join('');
+
+document.querySelectorAll('.ph-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const ph=b.parentElement, open=ph.dataset.open==='1';
+    ph.dataset.open = open?'0':'1';
+    b.setAttribute('aria-expanded', String(!open));
+  });
+});
+
+/* ---------------- audit ---------------- */
+const AU=[['A','Complejidad y encuadre',4],['B','Contrato y salida',9],['C','Context engineering',8],
+ ['CF','Control flow y estado',12],['D','Tools',15],['E','Modelo',6],['F','Cache y costo',8],
+ ['G','HITL, permisos y seguridad',18],['H','Evals',8],['I','Observabilidad y operación',10]];
+const MX=Math.max(...AU.map(a=>a[2]));
+document.getElementById('audit').innerHTML=AU.map(([c,n,v])=>`
+<div class="arow">
+  <div class="acode">${c}</div><div class="aname">${n}</div><div class="acount">${v}</div>
+  <div class="atrack"><div class="afill" style="width:${v/MX*100}%"></div></div>
+</div>`).join('');
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 ---
-name: agents-productivos
+name: agents-best-practices
 description: Guía de diseño y auditoría para agents de producción que NO son coding agents, como asistentes de soporte, research, back-office, análisis y orquestación de procesos. Cubre las decisiones de complejidad (agent vs workflow), contrato de salida estructurada, context engineering, diseño de tools, arquitectura single vs multi-agente, elección de modelo, prompt caching y economía de tokens, human-in-the-loop, evals de trayectoria y observabilidad. Usá esta skill siempre que alguien esté diseñando, revisando, escalando, abaratando o depurando un agent, incluso si no menciona best practices ni producción. Alcanza con que hable de un agent con tools, un asistente que ejecuta acciones, un flujo agéntico o subagentes, o que pregunte por qué su agent es lento, caro, inconsistente o se va de tema. También activala ante pedidos de auditar, revisar o armar un checklist de un agent existente.
 ---
 # Agents productivos: guía de diseño y auditoría
